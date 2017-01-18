@@ -185,7 +185,7 @@ class Daemon(object):
         # Flag whether next clipboard change should be ignored
         self.ignore_next = {'PRIMARY': False, 'CLIPBOARD': False}
 
-    def keypress_handler(self, widget, event, board, tree_select):
+    def keypress_handler(self, _, event, board, tree_select):
         """Handle selection_widget keypress events."""
 
         # Handle select with return or mouse
@@ -198,7 +198,7 @@ class Daemon(object):
         if event.keyval == Gdk.KEY_Escape:
             self.window.hide()
 
-    def delete_handler(self, event, board, tree_select):
+    def delete_handler(self, _, board, tree_select):
         """Delete selected history entries."""
 
         model, treepaths = tree_select.get_selected_rows()
@@ -226,7 +226,7 @@ class Daemon(object):
             # Remove entry from UI
             model.remove(treeiter)
 
-    def activate_handler(self, event, board, tree_select):
+    def activate_handler(self, _, board, tree_select):
         """Action selected history items."""
 
         # Get selection
