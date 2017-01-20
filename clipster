@@ -93,6 +93,10 @@ class Client(object):
         self.args = args
         self.client_action = args.select and "SELECT" or (args.ignore and "IGNORE" or args.delete is not None and "DELETE" or "BOARD")
         logging.debug("client_action: %s", self.client_action)
+        self.board = args.primary or args.clipboard or config.get('clipster', 'default_selection')
+        if self.board not in config.get('clipster', 'active_selections'):
+            raise ClipsterError("{0} not in 'active_selections' in config.".format(self.board))
+        logging.debug("client board: %s", self.board)
 
     def update(self):
         """Send a signal and (optional) data from STDIN to daemon socket."""
@@ -107,8 +111,7 @@ class Client(object):
             # Fix for http://bugs.python.org/issue1633941 in py 2.x
             # Send message 'header' - count is 0 (i.e to be ignored)
             sock.sendall("{0}:{1}:0:".format(self.client_action,
-                                             self.config.get('clipster',
-                                                             'default_selection')).encode('utf-8'))
+                                             self.board).encode('utf-8'))
 
             if self.client_action == "DELETE":
                 # Send delete args
@@ -140,8 +143,7 @@ class Client(object):
             logging.debug("Sending request to server.")
             # Send message 'header'
             sock.sendall("{0}:{1}:{2}:".format(self.client_action,
-                                               self.config.get('clipster',
-                                                               'default_selection'),
+                                               self.board,
                                                self.args.number).encode('utf-8'))
 
             sock.shutdown(socket.SHUT_WR)
@@ -777,10 +779,6 @@ def main():
     if args.daemon:
         Daemon(config).run()
     else:
-        board = args.primary or args.clipboard or config.get('clipster', 'default_selection')
-        if board not in config.get('clipster', 'active_selections'):
-            raise ClipsterError("{0} not in 'active_selections' in config.".format(board))
-        config.set('clipster', 'default_selection', board)
         client = Client(config, args)
 
         if args.output:
