@@ -301,13 +301,10 @@ class Daemon(object):
     def read_history_file(self):
         """Read clipboard history from file."""
 
-        try:
+        # Not an error if there is no history file
+        with suppress_if_errno(FileNotFoundError, errno.ENOENT):
             with open(self.hist_file) as hist_f:
                 self.boards.update(json.load(hist_f))
-        except FileNotFoundError as exc:
-            if exc.errno != errno.ENOENT:
-                # Not an error if there is no history file
-                raise
 
     def write_history_file(self):
         """Write clipboard history to file."""
